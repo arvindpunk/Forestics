@@ -4,39 +4,39 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='styles/bootstrap.css') }}">
     <title>Forest Cover Display...</title>
-
   </head>
   <body bgcolor="#78C0E0">
   	<div class="container">
     <h1 class="text-muted p-4">Forest Cover Analysis Using Satellite Image Processing</h1>
     <hr>
     <div id="app">
-      <div class="row">
-        <div class="col">
-          <label>Location Name</label>
-            <input type="text" class="form-control" v-model="name">
+      <form action="addnew" id="addLocationForm">
+        <div class="row">
+          <div class="col">
+            <label>Location Name</label>
+            <input type="text" class="form-control" id="name" name="location">
+          </div>
         </div>
-      </div>
-      <div class="row">
-      <div class="col">
-      <div class="form-group">
-        <label class="label">Lat:</label>
-        <input type="text" class="form-control" v-model="lat">
-      </div>
-      </div>
-      <div class="col">
-      <div class="form-group">
-        <label class="label">Lng:</label>
-        <input type="text" class="form-control" v-model="lng">
-      </div>
-      </div>
-      </div>
-        <button class="btn btn-success" @click="addLocation">Add Locations</button>    
+        <div class="row">
+          <div class="col">
+            <div class="form-group">
+              <label class="label">Lat:</label>
+              <input type="text" class="form-control" id="lat" name="lat">
+            </div>
+          </div>
+          <div class="col">
+            <div class="form-group">
+              <label class="label">Lng:</label>
+              <input type="text" class="form-control" id="lng" name="lng">
+            </div>
+          </div>
+        </div>
+      <input type="submit" class="btn btn-success" value="Add Location">
+    </form>
+
       <div class="alert alert-success m-2" v-if="success">Location added successfully</div>
         <div class="card m-2 p-2 shadow-sm"  v-for="path in images">
           <div class="card-body">
@@ -47,35 +47,8 @@
       </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script src="{{ url_for('static', filename = 'app.js') }}"></script>
-
-    <script>
-    $(document).ready(function(){
-    var dir = "./Images/"; // folder location
-    var fileextension = ".png"; // image format
-    var i = "1";
-    var r=1;
-
-    $(function imageloop(){
-      $("<img />").attr({'src': dir + i + fileextension , 'width':'500px', 'height' : '500px', 'class': 'img-thumbnail'}).appendTo("#cd");
-      if(i%3==0)
-      {
-        $("<div />").attr({'class': 'row', 'id':i}).appendTo("#cd");
-        $( '#'+i ).text( " Month "+r );
-        $("<hr />").attr({'class': 'style1'}).appendTo("#cd");
-        r++;
-      }
-      if (i==9){
-      }
-      else{
-        i++;
-        imageloop();
-      };
-    });   
-});
-</script>
+    <script src="{{url_for('static', filename='js/jquery-3.5.0.js')}}"></script>
+    <script src="{{url_for('static', filename='js/popper.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/bootstrap.js')}}"></script>
   </body>
 </html>

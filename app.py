@@ -1,8 +1,9 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect, url_for
 import requests
 from flask_cors import CORS
 import json
 import os
+import hashlib
 # from flask_pymongo import PyMongo
 # from pymongo import MongoClient
 from forest import findAcc
@@ -10,7 +11,7 @@ from forest import findAcc
 
 app = Flask(__name__)
 mapboxToken = os.getenv('MAPBOX_TOKEN')
-
+baseURL = 'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/'
 # CORS
 CORS(app)
 
@@ -27,18 +28,25 @@ coords = []
 #         updateData(lat, lng, name)
 
 
-def updateData(lat, lng, location):
-    name = lat + lng
-    URL = 'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/' + lng + ',' + lat + ',15/800x600?access_token=' + mapboxToken
-    r = requests.get(url = URL, stream =True)
+def updateData(location):
+    name = getName(location)
+    print(name)
+    URL = baseURL + location.lng + ',' + location.lat + ',15/800x600?access_token=' + mapboxToken
+    r = requests.get(url = URL, stream = True)
     if r.status_code == 200:
-        with open("/static/Images/" + name + '.png', 'wb') as f:
+        coords.append(locationObject)
+        path = os.path.join('static', 'images', 'test', '.png')
+        print(path)
+        return
+        with open(path + name + '.png', 'wb') as f:
             f.write(r.content)
-    findAcc('/static/Images/' + name + '.png', name)
+        findAcc(path + name + '.png', name)
+    else:
+        return 'Mapbox API not responding.', 301
 
 @app.route('/')
-def hello_world():
-    return render_template('index2.html')
+def home():
+    return render_template('index.html')
 
 @app.route('/getpaths', methods=['GET'])
 def getpaths():
@@ -52,7 +60,25 @@ def getpaths():
  
 @app.route('/addnew', methods=['GET'])
 def addnew():
-    coord = (request.args.get('lat'), request.args.get('lng'), request.args.get('name'))
-    coords.append(coord)
-    updateData(coord[0], coord[1], request.args.get('name'))
-    return '200'
+    location = {
+        'lat': request.args.get('lat', None),
+        'lng': request.args.get('lng', None),
+        'loc': request.args.get('location', None)
+    }
+    if isValidCoordinate(location):
+        updateData(location)
+        return redirect(url_for('home')), 200
+    else:
+        return redirect(url_for('home')), 301
+
+
+
+# Utility
+def isValidCoordinate(location):
+    if location.lat and location.lng and location.loc:
+        return True
+    return False
+
+def getName(location):
+    locationHash = hashlib.sha256(location.lat + location.lng).hexdigest()
+    return locationHash[:6] + "-" + locationHash[-6:]
