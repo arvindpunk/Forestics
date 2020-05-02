@@ -1,9 +1,12 @@
 import cv2 as cv
 import numpy as np
 import datetime
+import os
+from constants import ORIGINAL, MODIFIED
+from utils import getFilePath
 
-def findAcc(path, nam):
-	img = cv.imread(path)
+def findAcc(path):
+	img = cv.imread(getFilePath(ORIGINAL, path))
 	low_green = np.array([0, 80, 0])
 	high_green = np.array([150, 255, 100])
 	hsv_img = cv.cvtColor(img, cv.COLOR_BGR2HSV)
@@ -31,7 +34,7 @@ def findAcc(path, nam):
 	cv.putText(img, 'Forest Cover ' + str(area/tot * 100) , (56, 80), cv.FONT_HERSHEY_COMPLEX, 0.7, (2,255,2),2)
 	cv.putText(img, str(date.day) + '/' + str(date.month) + '/' + str(date.year) , (600, 500), cv.FONT_HERSHEY_COMPLEX, 0.7, (2,255,2),2)
 	
-	cv.imwrite('static/Images/' + nam +'.png', img)
+	cv.imwrite(getFilePath(MODIFIED, path), img)
 	return area/tot
 
 

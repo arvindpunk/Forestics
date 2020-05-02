@@ -6,12 +6,14 @@ import os
 import hashlib
 # from flask_pymongo import PyMongo
 # from pymongo import MongoClient
+from constants import baseDirectory, baseURL, ORIGINAL, MODIFIED, DATA
+from utils import getFilePath
 from forest import findAcc
 # from apscheduler.scheduler import Scheduler
 
 app = Flask(__name__)
 mapboxToken = os.getenv('MAPBOX_TOKEN')
-baseURL = 'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/'
+
 # CORS
 CORS(app)
 
@@ -29,24 +31,40 @@ coords = []
 
 
 def updateData(location):
-    name = getName(location)
-    print(name)
-    URL = baseURL + location.lng + ',' + location.lat + ',15/800x600?access_token=' + mapboxToken
+    dirName = getName(location)
+    endpoint = location.get('lng') + ',' + location.get('lat') + ',15/800x600?access_token=' + mapboxToken
+    URL = baseURL + endpoint
     r = requests.get(url = URL, stream = True)
     if r.status_code == 200:
-        coords.append(locationObject)
-        path = os.path.join('static', 'images', 'test', '.png')
+        coords.append(location)
+        path = os.path.join(baseDirectory, dirName)
         print(path)
-        return
-        with open(path + name + '.png', 'wb') as f:
+        if (not os.path.exists(path)):
+            os.mkdir(path)
+        with open(os.path.join(path, ORIGINAL), 'wb') as f:
             f.write(r.content)
-        findAcc(path + name + '.png', name)
+        with open(os.path.join(path, 'data'), 'w') as f:
+            f.write(location.get('loc'))
+        findAcc(path)
     else:
         return 'Mapbox API not responding.', 301
 
 @app.route('/')
+def root():
+    return redirect('/home')
+
+@app.route('/home')
 def home():
-    return render_template('index.html')
+    imagePaths = []
+    for imgdir in os.scandir(baseDirectory):
+        imagePathObject = {
+            'original': getFilePath(ORIGINAL, imgdir),
+            'modified': getFilePath(MODIFIED, imgdir),
+            'title': open(getFilePath(DATA, imgdir), 'r').read()
+        }
+        imagePaths.append(imagePathObject)
+    # TO-DO: Sort imagePaths w.r.t last modifed
+    return render_template('index.html', imagePaths=imagePaths)
 
 @app.route('/getpaths', methods=['GET'])
 def getpaths():
@@ -65,20 +83,22 @@ def addnew():
         'lng': request.args.get('lng', None),
         'loc': request.args.get('location', None)
     }
+    print(location)
     if isValidCoordinate(location):
         updateData(location)
-        return redirect(url_for('home')), 200
+        return redirect('/home', code=301)
     else:
-        return redirect(url_for('home')), 301
+        return redirect('/home', code=301)
 
 
 
 # Utility
 def isValidCoordinate(location):
-    if location.lat and location.lng and location.loc:
+    if location.get('lng', None) and location.get('lng', None) and location.get('loc', None):
         return True
     return False
 
 def getName(location):
-    locationHash = hashlib.sha256(location.lat + location.lng).hexdigest()
+    hashString = (location.get('lat') + location.get('lng')).encode('utf-8')
+    locationHash = hashlib.sha256(hashString).hexdigest()
     return locationHash[:6] + "-" + locationHash[-6:]

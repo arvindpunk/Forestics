@@ -1,49 +1,85 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
     <!-- Bootstrap CSS -->
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='styles/bootstrap.css') }}">
-    <title>Forest Cover Display...</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='styles/bootstrap.css') }}"
+    />
+    <title>Forest Cover Display</title>
   </head>
-  <body bgcolor="#78C0E0">
-  	<div class="container">
-    <h1 class="text-muted p-4">Forest Cover Analysis Using Satellite Image Processing</h1>
-    <hr>
-    <div id="app">
-      <form action="addnew" id="addLocationForm">
-        <div class="row">
-          <div class="col">
-            <label>Location Name</label>
-            <input type="text" class="form-control" id="name" name="location">
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <div class="form-group">
-              <label class="label">Lat:</label>
-              <input type="text" class="form-control" id="lat" name="lat">
+  <body class="">
+    <nav class="navbar navbar-light bg-light sticky-top shadow">
+      <a class="navbar-brand h1" href="/">Logo</a>
+      <div class="h1 text-muted text-center">
+        Forest Cover Analysis Using Satellite Image Processing
+      </div>
+    </nav>
+    
+    <div class="container">
+      <div id="app">
+        <form action="addnew" id="addLocationForm">
+          <div class="row my-2">
+            <div class="col">
+              <label class="text-muted">Location Name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                name="location"
+              />
             </div>
           </div>
-          <div class="col">
-            <div class="form-group">
-              <label class="label">Lng:</label>
-              <input type="text" class="form-control" id="lng" name="lng">
+          <div class="row my-2">
+            <div class="col">
+              <div class="form-group">
+                <label class="text-muted">Latitude</label>
+                <input type="text" class="form-control" id="lat" name="lat" />
+              </div>
+            </div>
+            <div class="col">
+              <div class="form-group">
+                <label class="text-muted">Longitude</label>
+                <input type="text" class="form-control" id="lng" name="lng" />
+              </div>
             </div>
           </div>
-        </div>
-      <input type="submit" class="btn btn-success" value="Add Location">
-    </form>
-
-      <div class="alert alert-success m-2" v-if="success">Location added successfully</div>
-        <div class="card m-2 p-2 shadow-sm"  v-for="path in images">
-          <div class="card-body">
-            <h5>[[ path[1] ]]</h5>
-            <img :src="'/static/Images/' + path[0] + '.png'">
+          <input type="submit" class="btn btn-success" value="Add Location" />
+        </form>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-success m-2">
+                Location added successfully
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        
+        {% for item in imagePaths %}
+          <div class="card my-3 shadow">
+            <div class="card-header">
+              <h1>
+                {{ item.title }}
+              </h1>
+            </div>
+            <div class="card-body d-flex justify-content-around">
+              <img src="{{ item.original }}" width="40%" />
+              <img src="{{ item.modified }}" width="40%" />
+            </div>
           </div>
-        </div>  
+        {% else %}
+          <div class="center my-4">
+            <h1 class="text-muted">No locations in our database, add a new one!</h1>
+          </div>
+        {% endfor %}
       </div>
     </div>
 
